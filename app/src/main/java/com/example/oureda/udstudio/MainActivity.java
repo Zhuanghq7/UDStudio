@@ -16,6 +16,8 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
 import android.view.animation.TranslateAnimation;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -28,11 +30,16 @@ public class MainActivity extends Activity {
     private boolean firstUpdated = true;
     private ImageView topBar;
     private TextView textView;
+    private ListView listView;
+
+    public LinearLayout[] items;
     public static int updateSuccessful = 0;
+
     /**
      * ATTENTION: This was auto-generated to implement the App Indexing API.
      * See https://g.co/AppIndexing/AndroidStudio for more information.
      */
+
     private GoogleApiClient client;
 
     public boolean checkNetworkInfo() {
@@ -64,6 +71,7 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
         topBar = (ImageView) findViewById(R.id.TopBar);
         textView = (TextView) findViewById(R.id.textview);
+        listView = (ListView) findViewById(R.id.listview);
 
         DisplayMetrics dm2 = getResources().getDisplayMetrics();
         int screemWidth = dm2.widthPixels;
@@ -104,16 +112,19 @@ public class MainActivity extends Activity {
         });
 
 
+
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
     }
 
-    public static void addViews(String s){
+    public void addViews(String s,int number){
         //根据服务器数据动态创建
         String name = null;
         int funNum = -1;
         String[] funs;
+
+
         int funsI = 0;
         for(int i = 0;i<s.length();i++){
             if(name == null && s.charAt(i) == ';') {
@@ -146,6 +157,10 @@ public class MainActivity extends Activity {
 
         funs[funs.length-1] = s.substring(oldI);
         Log.d("log","the last fun is : "+funs[funs.length-1]);
+
+        items[number] = new LinearLayout(this);
+        items[number].setId(number);
+       // items[number].setOrientation();
     }
     private void removeTopBar(){
         AnimationSet animationSet = new AnimationSet(true);

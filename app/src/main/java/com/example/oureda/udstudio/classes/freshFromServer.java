@@ -2,6 +2,7 @@ package com.example.oureda.udstudio.classes;
 
 import android.app.Activity;
 import android.util.Log;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.example.oureda.udstudio.MainActivity;
@@ -32,8 +33,9 @@ public class freshFromServer extends Thread{
             String temp = br.readLine();//得到控件数量
             log("控件数量 "+temp);
             int num = Integer.parseInt(temp);
+            activity.items = new LinearLayout[num];
             for(int i = 0;i<num;i++) {
-                MainActivity.addViews(br.readLine());
+                activity.addViews(br.readLine(),i);
             }
             activity.updateSuccessful = 1;
         } catch (Exception e) {
