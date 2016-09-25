@@ -91,9 +91,10 @@ public class MainActivity extends Activity {
             disRefreshBar();
             //remove old view
             textView.setVisibility(View.GONE);//
+            firstRefresh.setVisibility(View.GONE);
             firstUpdated = false;
         }else{
-
+            Toast.makeText(getApplicationContext(),"you click the secondRefresh button", Toast.LENGTH_SHORT).show();
         }
     }
     public void disRefreshBar() {
@@ -102,6 +103,19 @@ public class MainActivity extends Activity {
 
         //imageButton
         refreshbutton.setBackgroundResource(R.drawable.refresh);
+        refreshbutton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d("log", "clickSecondRefresh");
+                if(checkNetworkInfo()){
+                    refresh();
+                }else{
+                    Log.d("log","no internet connected");
+                    Toast.makeText(getApplicationContext(), "please check your net connect", Toast.LENGTH_SHORT).show();
+                }
+
+            }
+        });
         //refreshbar
         refreshbar.setBackgroundColor(Color.GRAY);
         refreshbar.setVisibility(View.VISIBLE);
@@ -145,7 +159,7 @@ public class MainActivity extends Activity {
             @Override
             public void onClick(View view) {
                 //Toast.makeText(getApplicationContext(),"23333",Toast.LENGTH_LONG).show();
-                Log.d("log", "click");
+                Log.d("log", "clickFirstRefresh");
                 if(checkNetworkInfo()){
                     refresh();
                 }else{
@@ -181,13 +195,13 @@ public class MainActivity extends Activity {
         String name = null;
         int funNum = -1;
         String[] funs;
-
+        String log = "";
 
         int funsI = 0;
         for(int i = 0;i<s.length();i++){
             if(name == null && s.charAt(i) == ';') {
                 name = s.substring(0, i);
-                Log.d("log","getName:"+name);
+                log+="getName:"+name;
                 s=s.substring(i+1);
                 break;
             }
@@ -196,7 +210,7 @@ public class MainActivity extends Activity {
         for(int i = 0;i<s.length();i++) {
             if(name!=null&&funNum==-1&&s.charAt(i)==';') {
                 funNum = Integer.parseInt(s.substring(0, i));
-                Log.d("log", "funNum:" + funNum);
+                log+="funNum:" + funNum;
                 s = s.substring(i + 1);
                 break;
             }
@@ -208,13 +222,13 @@ public class MainActivity extends Activity {
             if(s.charAt(i)==';'){
                 funs[funsI++] = s.substring(oldI,i);
                 oldI = i+1;
-
-                Log.d("log","fun "+(funsI)+" :"+funs[funsI-1]);
+                log+="fun "+(funsI)+" :"+funs[funsI-1];
             }
         }
 
         funs[funs.length-1] = s.substring(oldI);
-        Log.d("log","the last fun is : "+funs[funs.length-1]);
+        log+="fun "+funs.length+" :"+funs[funs.length-1];
+        Log.d("log",log);
 
         items[number] = new LinearLayout(this);
         items[number].setId(number);
