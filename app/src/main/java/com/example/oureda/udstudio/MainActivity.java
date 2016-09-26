@@ -10,14 +10,18 @@ import android.os.Bundle;
 import android.os.Looper;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
+import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
 import android.view.animation.TranslateAnimation;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -26,11 +30,20 @@ import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.api.GoogleApiClient;
 
+import org.w3c.dom.Text;
+
 public class MainActivity extends Activity {
     private boolean firstUpdated = true;
     private ImageView topBar;
     private TextView textView;
     private ListView listView;
+    private LinearLayout refreshbar;
+    private ImageButton refreshbutton;
+    private TextView appName;
+    private RelativeLayout firstRefresh;
+    public boolean updating = false;
+    public int screemWidth,screemHeight;
+    private int animationTime = 500;
 
     public LinearLayout[] items;
     public static int updateSuccessful = 0;
@@ -58,11 +71,61 @@ public class MainActivity extends Activity {
         Toast.makeText(getApplicationContext(), s, Toast.LENGTH_SHORT).show();
         Looper.loop();
     }
+    public void refresh(){
+        updateSuccessful = 0;
+        updating = true;
+        new freshFromServer(MainActivity.this).start();
+        while(updateSuccessful == 0){
+
+        }
+        if(updateSuccessful == 1){
+            Toast.makeText(getApplicationContext(),"update successful", Toast.LENGTH_SHORT).show();
+            moveViews();
+        }else{
+            Toast.makeText(getApplicationContext(),"update failed",Toast.LENGTH_SHORT).show();
+        }
+    }
     public void moveViews(){
         if(firstUpdated){
             removeTopBar();//把topbar移掉(下面的按钮会有闪现的效果=- =干脆删除吧
+            disRefreshBar();
+            //remove old view
             textView.setVisibility(View.GONE);//
+            firstRefresh.setVisibility(View.GONE);
+            firstUpdated = false;
+        }else{
+            Toast.makeText(getApplicationContext(),"you click the secondRefresh button", Toast.LENGTH_SHORT).show();
         }
+    }
+    public void disRefreshBar() {
+        refreshbutton = (ImageButton) findViewById(R.id.refreshbutton);
+        appName = (TextView) findViewById(R.id.refreshbarName);
+
+        //imageButton
+        refreshbutton.setBackgroundResource(R.drawable.refresh);
+        refreshbutton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d("log", "clickSecondRefresh");
+                if(checkNetworkInfo()){
+                    refresh();
+                }else{
+                    Log.d("log","no internet connected");
+                    Toast.makeText(getApplicationContext(), "please check your net connect", Toast.LENGTH_SHORT).show();
+                }
+
+            }
+        });
+        //refreshbar
+        refreshbar.setBackgroundColor(Color.GRAY);
+        refreshbar.setVisibility(View.VISIBLE);
+        AnimationSet animationSet = new AnimationSet(true);
+        AlphaAnimation alphaAnimation = new AlphaAnimation(0, 1);
+        alphaAnimation.setDuration(animationTime);
+        animationSet.addAnimation(alphaAnimation);
+        refreshbar.startAnimation(animationSet);
+        //appName
+        appName.setTextSize((int)(((float)22/480)*(float)screemWidth));
     }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,18 +134,24 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
         topBar = (ImageView) findViewById(R.id.TopBar);
         textView = (TextView) findViewById(R.id.textview);
-        listView = (ListView) findViewById(R.id.listview);
+        //listView = (ListView) findViewById(R.id.listview);
+        refreshbar = (LinearLayout) findViewById(R.id.refreshbar);
+        firstRefresh = (RelativeLayout) findViewById(R.id.firstRefresh);
 
         DisplayMetrics dm2 = getResources().getDisplayMetrics();
-        int screemWidth = dm2.widthPixels;
-        int screemHeight = dm2.heightPixels;
+        screemWidth = dm2.widthPixels;
+        screemHeight = dm2.heightPixels;
 
+        Log.d("log","width:"+screemWidth+" Height:"+screemHeight);
+
+        //refreshbar
+        //topBar
         topBar.setAdjustViewBounds(true);
         topBar.setMaxWidth(screemWidth);
         topBar.setMaxHeight((int) (screemWidth / 3.2));
         topBar.setBackgroundColor(Color.BLACK);
         topBar.setImageResource(R.drawable.topbar);
-
+        //textView
         textView.setText("click to update");
         textView.setTextSize(20);
         textView.setClickable(true);
@@ -90,19 +159,9 @@ public class MainActivity extends Activity {
             @Override
             public void onClick(View view) {
                 //Toast.makeText(getApplicationContext(),"23333",Toast.LENGTH_LONG).show();
-                Log.d("log", "click");
+                Log.d("log", "clickFirstRefresh");
                 if(checkNetworkInfo()){
-                    new freshFromServer(MainActivity.this).start();
-                    while(updateSuccessful == 0){
-
-                    }
-                    if(updateSuccessful == 1){
-                        Toast.makeText(getApplicationContext(),"update successful", Toast.LENGTH_SHORT).show();
-                        moveViews();
-                    }else{
-                        Toast.makeText(getApplicationContext(),"update failed",Toast.LENGTH_SHORT).show();
-                    }
-
+                    refresh();
                 }else{
                     Log.d("log","no internet connected");
                     Toast.makeText(getApplicationContext(), "please check your net connect", Toast.LENGTH_SHORT).show();
@@ -110,8 +169,21 @@ public class MainActivity extends Activity {
 
             }
         });
+        firstRefresh.setClickable(true);
+        firstRefresh.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                //Toast.makeText(getApplicationContext(),"23333",Toast.LENGTH_LONG).show();
+                Log.d("log", "click");
+                if(checkNetworkInfo()){
+                    refresh();
+                }else{
+                    Log.d("log","no internet connected");
+                    Toast.makeText(getApplicationContext(), "please check your net connect", Toast.LENGTH_SHORT).show();
+                }
 
-
+            }
+        });
 
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
@@ -123,13 +195,13 @@ public class MainActivity extends Activity {
         String name = null;
         int funNum = -1;
         String[] funs;
-
+        String log = "";
 
         int funsI = 0;
         for(int i = 0;i<s.length();i++){
             if(name == null && s.charAt(i) == ';') {
                 name = s.substring(0, i);
-                Log.d("log","getName:"+name);
+                log+="getName:"+name;
                 s=s.substring(i+1);
                 break;
             }
@@ -138,7 +210,7 @@ public class MainActivity extends Activity {
         for(int i = 0;i<s.length();i++) {
             if(name!=null&&funNum==-1&&s.charAt(i)==';') {
                 funNum = Integer.parseInt(s.substring(0, i));
-                Log.d("log", "funNum:" + funNum);
+                log+="funNum:" + funNum;
                 s = s.substring(i + 1);
                 break;
             }
@@ -150,13 +222,13 @@ public class MainActivity extends Activity {
             if(s.charAt(i)==';'){
                 funs[funsI++] = s.substring(oldI,i);
                 oldI = i+1;
-
-                Log.d("log","fun "+(funsI)+" :"+funs[funsI-1]);
+                log+="fun "+(funsI)+" :"+funs[funsI-1];
             }
         }
 
         funs[funs.length-1] = s.substring(oldI);
-        Log.d("log","the last fun is : "+funs[funs.length-1]);
+        log+="fun "+funs.length+" :"+funs[funs.length-1];
+        Log.d("log",log);
 
         items[number] = new LinearLayout(this);
         items[number].setId(number);
@@ -171,7 +243,7 @@ public class MainActivity extends Activity {
                 Animation.RELATIVE_TO_SELF,-1f
         );
 
-        translateAnimation.setDuration(1000);
+        translateAnimation.setDuration(animationTime/2);
         animationSet.addAnimation(translateAnimation);
         topBar.startAnimation(animationSet);
         topBar.setVisibility(View.GONE);

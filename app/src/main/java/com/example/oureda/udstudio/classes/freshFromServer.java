@@ -38,11 +38,13 @@ public class freshFromServer extends Thread{
                 activity.addViews(br.readLine(),i);
             }
             activity.updateSuccessful = 1;
+            activity.updating = false;
         } catch (Exception e) {
             Log.d("log","connect server failed");
             activity.createToast("fail to connect server");
             activity.updateSuccessful = 2;
             e.printStackTrace();
+            activity.updating = false;
         }
     }
 }
