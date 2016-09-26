@@ -25,12 +25,17 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.oureda.udstudio.adapter.mainAdapter;
 import com.example.oureda.udstudio.classes.freshFromServer;
+import com.example.oureda.udstudio.classes.item;
 import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.api.GoogleApiClient;
 
 import org.w3c.dom.Text;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends Activity {
     private boolean firstUpdated = true;
@@ -44,8 +49,8 @@ public class MainActivity extends Activity {
     public boolean updating = false;
     public int screemWidth,screemHeight;
     private int animationTime = 500;
+    private ArrayList<item> list;
 
-    public LinearLayout[] items;
     public static int updateSuccessful = 0;
 
     /**
@@ -89,6 +94,7 @@ public class MainActivity extends Activity {
         if(firstUpdated){
             removeTopBar();//把topbar移掉(下面的按钮会有闪现的效果=- =干脆删除吧
             disRefreshBar();
+            disListView();
             //remove old view
             textView.setVisibility(View.GONE);//
             firstRefresh.setVisibility(View.GONE);
@@ -96,6 +102,12 @@ public class MainActivity extends Activity {
         }else{
             Toast.makeText(getApplicationContext(),"you click the secondRefresh button", Toast.LENGTH_SHORT).show();
         }
+    }
+    public void disListView(){
+        listView.setVisibility(View.VISIBLE);
+        listView = (ListView)findViewById(R.id.listView);
+        mainAdapter adapter = new mainAdapter(getApplicationContext(),1,list);
+        listView.setAdapter(adapter);
     }
     public void disRefreshBar() {
         refreshbutton = (ImageButton) findViewById(R.id.refreshbutton);
@@ -230,8 +242,9 @@ public class MainActivity extends Activity {
         log+="fun "+funs.length+" :"+funs[funs.length-1];
         Log.d("log",log);
 
-        items[number] = new LinearLayout(this);
-        items[number].setId(number);
+        /*items[number] = new LinearLayout(this);
+        items[number].setId(number);*/
+        list.add(new item(name,funNum,funs));
        // items[number].setOrientation();
     }
     private void removeTopBar(){

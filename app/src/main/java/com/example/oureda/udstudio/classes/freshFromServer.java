@@ -33,7 +33,7 @@ public class freshFromServer extends Thread{
             String temp = br.readLine();//得到控件数量
             log("控件数量 "+temp);
             int num = Integer.parseInt(temp);
-            activity.items = new LinearLayout[num];
+            //activity.items = new LinearLayout[num];
             for(int i = 0;i<num;i++) {
                 activity.addViews(br.readLine(),i);
             }
